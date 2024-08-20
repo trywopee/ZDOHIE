@@ -1,0 +1,42 @@
+name: Deploy demo app
+run-name: "Deploy demo app: (${{ inputs.appVersion }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      appVersion:
+        type: choice
+        description: "App version to be deployed"
+        required: false
+        default: "demo-app-v1"
+        options:
+        - demo-app-v1
+        - demo-app-v2
+        - demo-app-v3
+      
+jobs:
+  demoapp:
+    name: Deploy demo app to GitHub Pages
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    permissions:
+      pages: write
+      id-token: write
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './${{ inputs.appVersion }}'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
